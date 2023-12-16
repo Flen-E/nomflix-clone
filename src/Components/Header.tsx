@@ -1,15 +1,20 @@
 import { Link, useMatch } from "react-router-dom";
 import styled from "styled-components";
-import { motion } from "framer-motion";
+import {
+  motion,
+  useAnimation,
+  useMotionValueEvent,
+  useScroll,
+} from "framer-motion";
+import { useEffect, useState } from "react";
 
-const Nav = styled.nav`
+const Nav = styled(motion.nav)`
   display: flex;
   justify-content: space-between;
   align-items: center;
   position: fixed;
   width: 100%;
   top: 0;
-  background-color: black;
   font-size: 14px;
   padding: 20px 60px;
   color: white;
@@ -51,12 +56,26 @@ const Item = styled.li`
 
 const Search = styled.span`
   color: white;
+  display: flex;
+  align-items: center;
+  position: relative;
   svg {
     height: 25px;
   }
+  margin : 0 10px;
+`;
+const Alram = styled.span`
+  color: white;
+  display: flex;
+  align-items: center;
+  position: relative;
+  svg {
+    height: 25px;
+  }
+  margin : 0 10px;
 `;
 
-const Circle = styled.span`
+const Circle = styled(motion.span)`
   position: absolute;
   width: 5px;
   height: 5px;
@@ -66,6 +85,19 @@ const Circle = styled.span`
   right: 0;
   margin: 0 auto;
   background-color: ${(props) => props.theme.red};
+`;
+
+const Input = styled(motion.input)`
+  transform-origin: right center;
+  position: absolute;
+  right: 0px;
+  padding: 5px 10px;
+  padding-left: 40px;
+  z-index: -1;
+  color: white;
+  font-size: 16px;
+  background-color: transparent;
+  border: 1px solid ${(props) => props.theme.white.lighter};
 `;
 
 const logoVariants = {
@@ -80,12 +112,48 @@ const logoVariants = {
   },
 };
 
+const navVariants = {
+  top: {
+    backgroundColor: "rgba(0,0,0,0)",
+  },
+  scroll: {
+    backgroundColor: "rgba(0,0,0,1)",
+  },
+};
+
+
 function Header() {
-    const homeMatch = useMatch("/");
-    const tvMatch = useMatch("/tv");
-    console.log(homeMatch, tvMatch);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const homeMatch = useMatch("/");
+  const seriesMatch = useMatch("/series");
+  const movieMatch = useMatch("/movie");
+  const inputAnimation = useAnimation();
+  const navAnimation = useAnimation();
+  const { scrollY } = useScroll();
+  const toggleSearch = () => {
+    if (searchOpen) {
+      // trigger the close animation
+      inputAnimation.start({
+        scaleX: 0,
+      });
+    } else {
+      // trigger the open animation
+      inputAnimation.start({
+        scaleX: 1,
+      });
+    }
+    setSearchOpen((prev) => !prev);
+  };
+
+  useMotionValueEvent(scrollY, "change", () => {
+    if (scrollY.get() > 80) {
+      navAnimation.start("scroll");
+    } else {
+      navAnimation.start("top");
+    }
+  });
   return (
-    <Nav>
+    <Nav variants={navVariants} animate={navAnimation} initial="top">
       <Col>
         <Logo
           variants={logoVariants}
@@ -100,20 +168,26 @@ function Header() {
         </Logo>
         <Items>
           <Item>
-            <Link to="/">
-              Home {homeMatch && <Circle />}
+            <Link to="/">홈 {homeMatch && <Circle layoutId="circle" />}</Link>
+          </Item>
+          <Item>
+            <Link to="/series">
+              시리즈 {seriesMatch && <Circle layoutId="circle" />}
             </Link>
           </Item>
           <Item>
-            <Link to="/tv">
-              Tv Shows  {tvMatch && <Circle />}
+            <Link to="/movie">
+              영화 {movieMatch && <Circle layoutId="circle" />}
             </Link>
           </Item>
         </Items>
       </Col>
       <Col>
         <Search>
-          <svg
+          <motion.svg
+            onClick={toggleSearch}       
+            animate={{ x: searchOpen ? -220 : 0 }}
+            transition={{ type: "linear" }}
             fill="currentColor"
             viewBox="0 0 20 20"
             xmlns="http://www.w3.org/2000/svg"
@@ -123,8 +197,29 @@ function Header() {
               d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
               clipRule="evenodd"
             ></path>
-          </svg>
+          </motion.svg>
+          <Input
+            initial= {{scaleX : 0}}
+            animate={inputAnimation}
+            transition={{ type: "linear" }}
+            placeholder="제목, 사람, 장르"
+          />
         </Search>
+        <Alram>
+          <motion.svg
+            id="Uploaded to svgrepo.com"
+            xmlns="http://www.w3.org/2000/svg"
+            xmlnsXlink="http://www.w3.org/1999/xlink"
+            fill="currentColor"
+            viewBox="0 0 32 32"
+          >
+          
+            <path
+              className="sharpcorners_een"
+              d="M28,22h-1l-1.834-10.39c-0.587-3.325-3.179-5.853-6.398-6.457C18.917,4.797,19,4.409,19,4 c0-1.657-1.343-3-3-3s-3,1.343-3,3c0,0.409,0.083,0.797,0.231,1.153C10.013,5.757,7.42,8.285,6.834,11.61L5,22H4l-1,4h26L28,22z  M16,3c0.551,0,1,0.449,1,1s-0.449,1-1,1s-1-0.449-1-1S15.449,3,16,3z M14,27h4v1c0,1.105-0.895,2-2,2s-2-0.895-2-2V27z"
+            />
+          </motion.svg>
+        </Alram>
       </Col>
     </Nav>
   );

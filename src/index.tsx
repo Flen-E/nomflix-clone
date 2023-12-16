@@ -68,6 +68,11 @@ a {
   text-decoration:none;
   color:inherit;
 }
+svg {
+  :hover {
+    cursor: pointer;
+  }
+}
 `;
 
 const root = ReactDOM.createRoot(
