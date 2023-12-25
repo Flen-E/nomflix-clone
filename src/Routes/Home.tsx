@@ -1,11 +1,12 @@
 import { useQuery } from "react-query";
-import { IData, IGetDataResult, LIST_TYPE, getNowPlayingMovies } from "../api";
+import { IData, IGetDataResult, MOVIE_LIST, getNowPlayingMovies } from "../api";
 import { styled } from "styled-components";
 import { makeImagePath } from "../utils";
 import { motion, AnimatePresence, useScroll } from "framer-motion";
 import { useState } from "react";
 import { PathMatch, useMatch, useNavigate } from "react-router-dom";
 import Banner from "../Components/Banner";
+import Slider from "../Components/Slider";
 
 const Wrapper = styled.div`
   background-color: black;
@@ -19,12 +20,15 @@ const Loader = styled.div`
   align-items: center;
 `;
 
-
-
-const Slider = styled.div`
+const SliderArea = styled.div`
   position: relative;
-  top: -100px;
+  margin-top: -16.8rem;
+  @media screen and (max-width: 700px) {
+    margin-top: -8.8rem;
+  }
 `;
+
+
 
 const Row = styled(motion.div)`
   display: grid;
@@ -154,7 +158,7 @@ function Home() {
   const { scrollY } = useScroll();
     // nowplaying
     const { data: nowPlayingMoviesList, isLoading } = useQuery<IGetDataResult>(
-      [LIST_TYPE[0], "nowPlayingMovies"],
+      [MOVIE_LIST[0], "nowPlayingMovies"],
       getNowPlayingMovies
     );
   const [index, setIndex] = useState(0);
@@ -194,6 +198,19 @@ function Home() {
             detailSearchUrl={`home/banner`}
             requestUrl={"movie"}
           />
+          <SliderArea>
+            <Slider
+            data = {nowPlayingMoviesList as IGetDataResult}
+            title = {"새로 올라온 콘텐츠"}
+            movieList={MOVIE_LIST[0]}
+            menuName={"home"}
+            mediaType={"movie"}
+            
+
+            />
+
+          </SliderArea>
+          
 
           
           {/* <Slider>

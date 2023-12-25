@@ -3,10 +3,10 @@ const LANGUAGE = "ko-KO";
 const BASE_PATH = "https://api.themoviedb.org/3";
 const REGION = "KR";
 const TAIL_PATH = `api_key=${API_KEY}&language=${LANGUAGE}&region=${REGION}`;
-export const LIST_TYPE = [
+export const MOVIE_LIST = [
     "nowPlaying",
     "upcomingMovies",
-    "popularMovies",
+    "topRatedMovies",
     "tvShow",
   ]; // 영상 종류
 
@@ -18,6 +18,14 @@ export interface IData {
     title?: string; // 제목
     name?: string; // 제목
     overview: string; // 영화 요약
+  }
+
+  export interface ISlider{
+    data : IGetDataResult;
+    title : string;
+    movieList : string;
+    menuName : string;
+    mediaType :string;
   }
 
   // themoviedb.org "movie/now_playing" api interface

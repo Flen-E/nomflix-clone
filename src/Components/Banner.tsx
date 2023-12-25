@@ -11,7 +11,7 @@ const Wrapper = styled.div<{bgphoto : string}>`
   flex-direction: column;
   justify-content: center;
   height: 100vh;
-  padding: 6.8rem 6rem;
+  padding: 20rem 6.8rem 30rem 6rem;
   background-repeat: no-repeat;
   background-image: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 1)),
     url(${(props) => props.bgphoto});
