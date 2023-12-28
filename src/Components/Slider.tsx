@@ -105,7 +105,7 @@ const infoVariants = {
   },
 };
 
-const ArrowBtn = styled(motion.div)<{ mobile: number }>`
+const ArrowBtn = styled(motion.div)<{ mobile: number}>`
   position: absolute;
   display: flex;
   justify-content: center;
@@ -116,9 +116,11 @@ const ArrowBtn = styled(motion.div)<{ mobile: number }>`
   background-color: rgba(0, 0, 0, 0.5);
   opacity: ${(props) => props.mobile};
   transition: all 0.3s;
-  z-index: 90;
+  z-index: 100;
   border-radius: 0.2vw;
   cursor: pointer;
+  
+
 
   &:blur {
     color: #fff;
@@ -127,19 +129,19 @@ const ArrowBtn = styled(motion.div)<{ mobile: number }>`
   svg {
     width: 2.8rem;
     height: 2.8rem;
-    display: none;
     
-    &:hover {
-        display: block;
-    }
   }
 `;
 
-const LeftArrowBtn = styled(ArrowBtn)`
+const LeftArrowBtn = styled(ArrowBtn)<{isVisible: boolean }>`
+opacity: ${props => (props.isVisible ? '1' : '0')};
+  transition: opacity 0.3s ease-in-out;
   left: 0;
 `;
 
-const RightArrowBtn = styled(ArrowBtn)`
+const RightArrowBtn = styled(ArrowBtn)<{isVisible: boolean }>`
+opacity: ${props => (props.isVisible ? '1' : '0')};
+  transition: opacity 0.3s ease-in-out;
   right: 0;
 `;
 
@@ -148,28 +150,47 @@ const offset = 7;
 function Slider({ data, title, movieList, menuName, mediaType }: ISlider) {
   const [leavingSlider, setLeavingSlider] = useState(false);
   const toggleLeaving = () => setLeavingSlider((prev) => !prev);
+  const [back, setBack] = useState(false);
+  const [pageVisible, setPageVisible] = useState(1);
+  const nextPlease = () => {setBack(false); setPageVisible(prev => prev === 10 ? 1 : prev +1 )};
+  const prevPlease = () => {setBack(true); setPageVisible(prev => prev === 1 ? 10 : prev -1)};
   const [index, setIndex] = useState(0);
+  const [isVisible, setIsVisible] = useState(false);
   const navigate = useNavigate();
   const onBoxClicked = (menu: string, type: string, id: number) => {
     navigate(`/${menu}/${type}/${id}`);
   };
+
+   // 마우스를 버튼 위에 올리면 isVisible을 true로 설정하여 버튼이 나타나게 합니다.
+   const handleMouseEnter = () => {
+    setIsVisible(true);
+  };
+
+  // 마우스가 버튼을 벗어나면 isVisible을 false로 설정하여 버튼이 사라지게 합니다.
+  const handleMouseLeave = () => {
+    setIsVisible(false);
+  };
+
   return (
-    <Wrapper>
+    <Wrapper onMouseEnter={handleMouseEnter}
+    onMouseLeave={handleMouseLeave}>
       <Title>{title}</Title>
-      <LeftArrowBtn>
-        <AiOutlineLeft />
+      <LeftArrowBtn isVisible={isVisible}>
+        <AiOutlineLeft   />
       </LeftArrowBtn>
-      <RightArrowBtn>
+      <RightArrowBtn isVisible={isVisible}>
         <AiOutlineRight />
       </RightArrowBtn>
       <AnimatePresence initial={false} onExitComplete={toggleLeaving}>
         <Row
+          custom={back}
           variants={rowVariants}
           initial="hidden"
           animate="visible"
           exit="exit"
           transition={{ ease: "linear", duration: 1 }}
           key={index}
+          
         >
           {data?.results
             .slice(1)
