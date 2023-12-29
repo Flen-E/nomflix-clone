@@ -30,44 +30,6 @@ const SliderArea = styled.div`
 
 
 
-const Row = styled(motion.div)`
-  display: grid;
-  gap: 5px;
-  grid-template-columns: repeat(6, 1fr);
-  position: absolute;
-  width: 100%;
-`;
-
-const Box = styled(motion.div)<{ bgPhoto: string }>`
-  background-color: white;
-  background-image: url(${(props) => props.bgPhoto});
-  background-size: cover;
-  background-position: center center;
-  height: 200px;
-  color: red;
-  font-size: 66px;
-  cursor: pointer;
-  &:first-child {
-    transform-origin: center left;
-  }
-  &:last-child {
-    transform-origin: center right;
-  }
-`;
-
-const Info = styled(motion.div)`
-  padding: 10px;
-  background-color: ${(props) => props.theme.black.lighter};
-  opacity: 0;
-  position: absolute;
-  width: 100%;
-  bottom: 0;
-  h4 {
-    text-align: center;
-    font-size: 18px;
-  }
-`;
-
 const Overlay = styled(motion.div)`
   position: fixed;
   top: 0;
@@ -111,46 +73,6 @@ const BigOverview = styled.p`
   top :-80px;
 `;
 
-const rowVariants = {
-  hidden: {
-    x: window.outerWidth - 50,
-  },
-  visible: {
-    x: 0,
-  },
-  exit: {
-    x: -window.outerWidth + 50,
-  },
-};
-
-const boxVariants = {
-  normal: {
-    scale: 1,
-  },
-  hover: {
-    scale: 1.3,
-    y: -50,
-
-    transition: {
-      delay: 0.2,
-      duration: 0.1,
-      type: "tween",
-    },
-  },
-};
-
-const infoVariants = {
-  hover: {
-    opacity: 1,
-    transition: {
-      delay: 0.2,
-      duration: 0.1,
-      type: "tween",
-    },
-  },
-};
-
-const offset = 6;
 
 function Home() {
   const navigate = useNavigate();
@@ -161,22 +83,6 @@ function Home() {
       [MOVIE_LIST[0], "nowPlayingMovies"],
       getNowPlayingMovies
     );
-  const [index, setIndex] = useState(0);
-
-  const [leavingSlider, setLeavingSlider] = useState(false);
-  const increaseIndex = () => {
-    if (nowPlayingMoviesList) {
-      if (leavingSlider) return;
-      toggleLeaving();
-      const totalMovies = nowPlayingMoviesList.results.length - 1;
-      const maxIndex = Math.floor(totalMovies / offset) - 1;
-
-      setIndex((prev) => (prev === maxIndex ? 0 : prev + 1));
-    }
-  };
-  const toggleLeaving = () => setLeavingSlider((prev) => !prev);
-
-
   const onOverlayClick = () => {
     navigate("/");
   };

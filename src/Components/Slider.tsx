@@ -29,11 +29,10 @@ const Title = styled.div`
 const Row = styled(motion.div)`
   display: grid;
   gap: 8px;
-  grid-template-columns: repeat(7, 1fr);
+  grid-template-columns: repeat(6, 1fr);
   position: absolute;
-
-  width: 107%;
-  margin: 0 4% 0.5em;
+  width: 128%;
+  margin: 0 -14% 0.5em;
 `;
 
 const Box = styled(motion.div)<{ bgPhoto: string }>`
@@ -41,7 +40,7 @@ const Box = styled(motion.div)<{ bgPhoto: string }>`
   background-image: url(${(props) => props.bgPhoto});
   background-size: cover;
   background-position: center center;
-  height: 9.2rem;
+  height: 14rem;
   color: red;
   font-size: 66px;
   border-radius: 0.2vw;
@@ -55,15 +54,19 @@ const Box = styled(motion.div)<{ bgPhoto: string }>`
 `;
 
 const rowVariants = {
-  hidden: {
-    x: window.outerWidth - 50,
-  },
+  hidden: (back:boolean) =>(
+    {
+      x: back ?  -window.outerWidth + 5 : +window.outerWidth + 5,
+    }
+  ), 
   visible: {
     x: 0,
   },
-  exit: {
-    x: -window.outerWidth + 50,
-  },
+  exit: (back:boolean) =>(
+    {
+      x: back ? +window.outerWidth + 5 : -window.outerWidth + 5,
+    }
+  ) 
 };
 const boxVariants = {
   normal: {
@@ -145,17 +148,17 @@ opacity: ${props => (props.isVisible ? '1' : '0')};
   right: 0;
 `;
 
-const offset = 7;
+const offset = 6;
 
 function Slider({ data, title, movieList, menuName, mediaType }: ISlider) {
-  const [leavingSlider, setLeavingSlider] = useState(false);
-  const toggleLeaving = () => setLeavingSlider((prev) => !prev);
   const [back, setBack] = useState(false);
-  const [pageVisible, setPageVisible] = useState(1);
-  const nextPlease = () => {setBack(false); setPageVisible(prev => prev === 10 ? 1 : prev +1 )};
-  const prevPlease = () => {setBack(true); setPageVisible(prev => prev === 1 ? 10 : prev -1)};
+  const [leaving, setLeaving] = useState(false);
   const [index, setIndex] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
+  const toggleLeaving = (value: boolean) => {
+    setLeaving(value);
+
+  };
   const navigate = useNavigate();
   const onBoxClicked = (menu: string, type: string, id: number) => {
     navigate(`/${menu}/${type}/${id}`);
@@ -171,17 +174,46 @@ function Slider({ data, title, movieList, menuName, mediaType }: ISlider) {
     setIsVisible(false);
   };
 
+  const nextIndex = () => {
+    if (data) {
+      if (leaving) return;
+      toggleLeaving(true);
+      setBack(false);
+      const totalMovies = data.results.length;
+      const maxIndex =
+      totalMovies % offset === 0
+        ? Math.floor(totalMovies / offset) - 1
+        : Math.floor(totalMovies / offset);
+      setIndex((prev) => (prev === maxIndex ? 0 : prev + 1));
+    }
+  };
+
+  const prevIndex = () => {
+    if (data) {
+      if (leaving) return;
+      toggleLeaving(true);
+      setBack(true);
+      const totalMovies = data.results.length;//20개일꺼임
+      const maxIndex =
+      totalMovies % offset === 0
+        ? Math.floor(totalMovies / offset) - 1
+        : Math.floor(totalMovies / offset);
+      setIndex((prev) => (prev === 0 ? maxIndex : prev - 1));
+    }
+  };
+
+
   return (
     <Wrapper onMouseEnter={handleMouseEnter}
     onMouseLeave={handleMouseLeave}>
       <Title>{title}</Title>
-      <LeftArrowBtn isVisible={isVisible}>
+      <LeftArrowBtn isVisible={isVisible} onClick={prevIndex}>
         <AiOutlineLeft   />
       </LeftArrowBtn>
-      <RightArrowBtn isVisible={isVisible}>
+      <RightArrowBtn isVisible={isVisible} onClick={nextIndex}>
         <AiOutlineRight />
       </RightArrowBtn>
-      <AnimatePresence initial={false} onExitComplete={toggleLeaving}>
+      <AnimatePresence  custom={back} initial={false} onExitComplete={() => toggleLeaving(false)}>
         <Row
           custom={back}
           variants={rowVariants}
@@ -189,12 +221,29 @@ function Slider({ data, title, movieList, menuName, mediaType }: ISlider) {
           animate="visible"
           exit="exit"
           transition={{ ease: "linear", duration: 1 }}
-          key={index}
-          
+          key={index}  
         >
-          {data?.results
-            .slice(1)
-            .slice(offset * index, offset * index + offset)
+          {index !== 2 ?
+            data?.results
+            .slice((offset-2) * index, (offset-2) * index + offset)
+            .map((movie) => (
+              <Box
+                layoutId={movie.id + ""}
+                variants={boxVariants}
+                key={movie.id}
+                initial="normal"
+                whileHover="hover"
+                onClick={() => onBoxClicked(menuName, movieList, movie.id)}
+                transition={{ type: "tween" }}
+                bgPhoto={makeImagePath(movie.backdrop_path, "w500")}
+              >
+                <Info variants={infoVariants}>
+                  <h4>{movie.title}</h4>
+                </Info>
+              </Box>
+            )) : data?.results
+            .slice((offset-2) * index, (offset-2) * index + offset-2).concat(data?.results
+              .slice(0,2))
             .map((movie) => (
               <Box
                 layoutId={movie.id + ""}
