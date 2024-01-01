@@ -223,7 +223,7 @@ function Slider({ data, title, movieList, menuName, mediaType }: ISlider) {
           transition={{ ease: "linear", duration: 1 }}
           key={index}  
         >
-          {index !== 2 ?
+          {index !== 3 ?
             data?.results
             .slice((offset-2) * index, (offset-2) * index + offset)
             .map((movie) => (
